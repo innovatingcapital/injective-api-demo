@@ -11,13 +11,17 @@ denoms_testnet = pkg_resources.read_text(pyinjective, "denoms_testnet.ini")
 
 denoms_mainnet = pkg_resources.read_text(pyinjective, "denoms_mainnet.ini")
 
-_current_dir = os.path.dirname(os.path.abspath(__file__))
-MAIN_DIR = os.path.dirname(os.path.dirname(_current_dir))
-CONFIG_DIR = MAIN_DIR
+CONFIG_DIR = os.path.dirname(os.path.abspath(__file__))
+MAIN_DIR = os.path.dirname(os.path.dirname(CONFIG_DIR))
 sys.path.insert(0, MAIN_DIR)
 
-
 if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print(f"Usage: start.py <private key>")
+        exit(1)
+    private_key = sys.argv[1]
+    print(f"Private key is: {private_key}")
+
     from util.misc import restart_program
     from perp_simple_strategy import Demo
 
@@ -56,6 +60,7 @@ if __name__ == "__main__":
             logging,
             mainnet_configs,
             testnet_configs,
+            private_key,
         )
         perp_demo.start()
     except Exception as e:

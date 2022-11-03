@@ -11,7 +11,7 @@ from datetime import datetime
 
 
 class PerpTemplate(object):
-    def __init__(self, setting, logger, mainnet_configs, testnet_configs):
+    def __init__(self, setting, logger, mainnet_configs, testnet_configs, priv_key):
         self.logger = logger
         self.symbol = setting["symbol"]
         self.base_asset = setting["base_asset"]
@@ -52,15 +52,17 @@ class PerpTemplate(object):
                     self.logger.info("market id:{}".format(self.market_id))
                     break
 
-        self.priv_key = PrivateKey.from_hex(setting["priv_key"])
+        # self.priv_key = PrivateKey.from_hex(setting["priv_key"])
+        self.priv_key = PrivateKey.from_hex(priv_key)
         self.pub_key = self.priv_key.to_public_key()
         self.client = AsyncClient(self.network, insecure=False)
         loop = asyncio.get_event_loop()
         loop.run_until_complete(self.get_address())
         self.acc_id = self.address.get_subaccount_id(index=0)
-        # ATTENTION: if you use api to trade, make sure the fee_recipient is your own addres,
+        # ATTENTION: if you use api to trade, make sure the fee_recipient is your own address,
         # otherwise, you may not get the gas fee discount from api side.
         self.sender = self.fee_recipient = self.address.to_acc_bech32()
+        loop.run_until_complete(self.get_subaccount_list(self.sender))
 
         self.composer = ProtoMsgComposer(network=self.network.string())
         self.is_trading = False
@@ -179,6 +181,19 @@ class PerpTemplate(object):
             # self.logger.info("################################")
 
     """ account related function"""
+    async def get_subaccount_list(self, account_address):
+        print(account_address)
+        all_bank_balances = await self.client.get_bank_balances(address=account_address)
+        print(all_bank_balances)
+
+        subacc_list = await self.client.get_subaccount_list(account_address)
+        print("Sub accounts list")
+        for subaccount in subacc_list.subaccounts:
+            print(subaccount)
+            subacc_balances_list = await self.client.get_subaccount_balances_list(subaccount)
+            print(subacc_balances_list)
+        portfolio = await self.client.get_portfolio(account_address=account_address)
+        print(portfolio)
 
     async def get_account_order(self):
         subacc_order_summary = await self.client.get_subaccount_order_summary(

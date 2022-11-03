@@ -1,3 +1,5 @@
+import random
+
 from perp_template import PerpTemplate
 from datetime import datetime
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -14,8 +16,8 @@ import traceback
 
 
 class Demo(PerpTemplate):
-    def __init__(self, setting, logger, mainnet_configs, testnet_configs):
-        super().__init__(setting, logger, mainnet_configs, testnet_configs)
+    def __init__(self, setting, logger, mainnet_configs, testnet_configs, priv_key):
+        super().__init__(setting, logger, mainnet_configs, testnet_configs, priv_key)
         self.setting = setting
         self.is_trading = False
         self.init_strategy()
@@ -89,6 +91,7 @@ class Demo(PerpTemplate):
 
     async def get_init_position(self):
         position = await self.get_position()
+        print(f"Init position - {position}")
         if len(position.positions) > 0:
             position_data = position.positions[0]
             self.net_position = (
@@ -126,6 +129,8 @@ class Demo(PerpTemplate):
             )
             self.bid_price = mid_price - half_spread
             self.ask_price = mid_price + half_spread
+            print(f"Bid price - {self.bid_price}")
+            print(f"Ask price - {self.ask_price}")
 
     async def market_making(self):
         self.msg_list = []
@@ -225,6 +230,7 @@ class Demo(PerpTemplate):
         )
 
     def quote_bid_ask(self):
+        self.order_size *= (1+random.randint(0, 9)/10)
         self.msg_list.append(
             self.composer.MsgCreateDerivativeLimitOrder(
                 market_id=self.market_id,
