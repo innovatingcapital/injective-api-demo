@@ -43,6 +43,8 @@ class Demo(PerpTemplate):
             print("More details: https://hub.injective.network/proposals/106")
             return
 
+        self.spread_factor = int(self.setting["spread_factor"])
+
         self.gas_price = 500000000
         self.strategy_name = self.setting["strategy_name"]
         if self.setting.get("start_time", None):
@@ -124,11 +126,12 @@ class Demo(PerpTemplate):
         if self.tick:
             mid_price = (self.tick.bid_price_1 + self.tick.ask_price_1) / 2
 
-            half_spread = max(
-                mid_price * self.spread_ratio / 2, 2 * float(self.tick_size)
+            spread = max(
+                mid_price * self.spread_ratio / self.spread_factor, 2 * float(self.tick_size)
             )
-            self.bid_price = mid_price - half_spread
-            self.ask_price = mid_price + half_spread
+
+            self.bid_price = mid_price - spread
+            self.ask_price = mid_price + spread
             print(f"Bid price - {self.bid_price}")
             print(f"Ask price - {self.ask_price}")
 

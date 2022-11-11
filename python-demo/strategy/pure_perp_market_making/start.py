@@ -16,8 +16,8 @@ MAIN_DIR = os.path.dirname(os.path.dirname(CONFIG_DIR))
 sys.path.insert(0, MAIN_DIR)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print(f"Usage: start.py <private key>")
+    if len(sys.argv) != 4:
+        print(f"Usage: start.py <private key> <config file name>" "<log file name>")
         exit(1)
     private_key = sys.argv[1]
     print(f"Private key is: {private_key}")
@@ -26,8 +26,8 @@ if __name__ == "__main__":
     from perp_simple_strategy import Demo
 
     log_dir = "./log"
-    log_name = "./perp_demo.log"
-    config_name = "configs.ini"
+    log_name = sys.argv[3]
+    config_name = sys.argv[2]
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     logging.basicConfig(
